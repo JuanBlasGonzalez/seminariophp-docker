@@ -54,8 +54,7 @@ class AssetController {
         $loggedInUser = $request->getAttribute('user');
         if (!$loggedInUser || !$loggedInUser['is_admin']) {
             $response->getBody()->write(json_encode(['error' => 'Acceso denegado. Se requiere ser administrador.']));
-            // 403 Forbidden es el código correcto para un usuario autenticado sin los permisos necesarios.
-            return $response->withStatus(403);
+            return $response->withStatus(401);
         }
 
         // 2. Obtener todos los activos existentes.
