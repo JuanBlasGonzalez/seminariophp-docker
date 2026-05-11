@@ -100,26 +100,24 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Para cumplir con la aclaración de "no borrar si se está usando"
-    public static function hasAssets($id) {
+    public static function getBalanceById($id) {
         $db = DB::getConnection();
-    	// Chequeamos si tiene algo en su portfolio
-    	$stmt = $db->prepare("SELECT COUNT(*) FROM portfolio WHERE user_id = ?");
-    	$stmt->execute([$id]);
-    	return $stmt->fetchColumn() > 0;
-   }
+        $stmt = $db->prepare("SELECT balance FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        $balance = $stmt->fetchColumn();
+        return $balance === false ? null : (float)$balance;
+    }
 
-    // Para el DELETE /users/{id} 
-    public static function delete($id) {
+    public static function changeBalance($id, $amount) {
         $db = DB::getConnection();
-    	$stmt = $db->prepare("DELETE FROM users WHERE id = ?");
-    	return $stmt->execute([$id]);
-   }
+        $stmt = $db->prepare("UPDATE users SET balance = balance + ? WHERE id = ?");
+        return $stmt->execute([$amount, $id]);
+    }
 
     // Método para validar el password
     public static function validarPassword($password) {
         // Mínimo 8 caracteres, una mayúscula, una minúscula, un número y un especial
-        $regex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/";
+        $regex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
         return preg_match($regex, $password); //preg_match compara un patron contra un texto
     }
 
