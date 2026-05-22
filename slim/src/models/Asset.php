@@ -20,11 +20,11 @@ class Asset {
     // Obtener activos con filtros opcionales
     public static function getFiltered($filters) {
         $db = DB::getConnection();
-        // 1. Empezamos con una consulta base que siempre es verdadera.
+        // Consulta base que se irá construyendo dinámicamente según los filtros que existan.
         $query = "SELECT * FROM assets WHERE 1=1";
         $params = [];
 
-        // 2. Añadimos condiciones a la consulta dinámicamente si los filtros existen.
+        // Añadimos condiciones a la consulta dinámicamente si los filtros existen.
         if (!empty($filters['type'])) {
             $query .= " AND name = ?";
             $params[] = $filters['type'];
@@ -38,10 +38,10 @@ class Asset {
             $params[] = $filters['max_price'];
         }
 
-        // 3. Preparamos la consulta que hemos construido.
+        // Preparamos la consulta que hemos construido.
         $stmt = $db->prepare($query);
 
-        // 4. Ejecutamos la consulta con los parámetros correspondientes.
+        // Ejecutamos la consulta con los parámetros correspondientes.
         $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -77,7 +77,7 @@ class Asset {
         // Para el endpoint GET /assets/{asset_id}/history/{quantity}
     public static function getHistoryForAsset($asset_id, $limit) {
         $db = DB::getConnection();
-        // Seleccionamos solo los datos no sensibles que pide el TP, ordenados por fecha más reciente.
+        // Seleccionamos solo los datos no sensibles, ordenados por fecha más reciente.
         $stmt = $db->prepare("SELECT transaction_date, transaction_type, quantity, price_per_unit 
                               FROM transactions 
                               WHERE asset_id = ? 
