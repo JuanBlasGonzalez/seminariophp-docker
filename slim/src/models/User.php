@@ -19,16 +19,7 @@ class User {
     // Obtener todos los usuarios para el endpoint GET /users
     public static function getAll() {
         $db = DB::getConnection();
-        // Esta consulta calcula el valor total del portfolio para cada usuario no administrador.
-        // 1. Selecciona el nombre del usuario (u.name).
-        // 2. Calcula el valor total del portfolio ('total_portfolio_value') sumando:
-        //    - El valor total de sus activos, que es la suma (SUM) de la cantidad de cada activo (p.quantity) 
-        //      multiplicada por su precio actual (a.current_price).
-        //    - COALESCE se usa para manejar usuarios sin activos; si la suma es NULL, la convierte a 0.
-        // 3. Une las tablas 'users' (u), 'portfolio' (p) y 'assets' (a) para acceder a todos los datos necesarios.
-        //    - LEFT JOIN asegura que se incluyan todos los usuarios, incluso aquellos sin activos en su portfolio.
-        // 4. Filtra los resultados para excluir a los administradores (u.is_admin = 0).
-        // 5. Agrupa los resultados por usuario para que la función SUM() funcione correctamente para cada uno.
+        // Esta consulta devuelve el nombre y el valor total del portfolio para cada usuario no administrador.
         $query = "
             SELECT 
                 u.name,(COALESCE(SUM(p.quantity * a.current_price), 0)) AS total_portfolio_value
@@ -67,7 +58,7 @@ class User {
             $fields[] = "password = ?";
             $params[] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
-        if (empty($fields)) { return false; } // No hay nada que actualizar
+        if (empty($fields)) { return false; } 
         $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = ?";
         $params[] = $id;
         $stmt = $db->prepare($query);
@@ -129,7 +120,7 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Para el middleware y logout: buscar usuario por su token
+    // Se usa en el middleware y logout: busca un usuario por su token
     public static function findByToken($token) {
         $db = DB::getConnection();
         $stmt = $db->prepare("SELECT * FROM users WHERE token = ?");
