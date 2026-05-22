@@ -44,11 +44,11 @@ class PortfolioController {
 
         // 5. Analizar el resultado de la eliminación.
         if ($deletedRows > 0) {
-            // Caso 2: El registro existía (con cantidad 0) y fue eliminado con éxito.
+            // El registro existía (con cantidad 0) y fue eliminado con éxito.
             $response->getBody()->write(json_encode(['message' => 'Activo eliminado del portfolio con exito.']));
             return $response->withStatus(200);
         } else {
-            // Caso 3: El usuario nunca tuvo este activo en su portfolio. El registro a eliminar no fue encontrado.
+            // El usuario nunca tuvo este activo en su portfolio. El registro a eliminar no fue encontrado.
             $response->getBody()->write(json_encode(['error' => 'Este activo no se encuentra en tu portfolio.']));
             return $response->withStatus(404);
         }
