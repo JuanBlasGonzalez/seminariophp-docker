@@ -18,40 +18,40 @@ class AuthMiddleware implements Middleware{
     }
 
     public function process(Request $request, RequestHandler $handler): Response {
-        // 1. Obtener el token del header 'Authorization'.
+        // Obtener el token del header 'Authorization'.
         $authHeader = $request->getHeaderLine('Authorization');
         $token = null;
 
-        // 2. Extraer el token del formato "Bearer <token>".
+        // Verificar que el header tenga el formato "Bearer {token}" y extraer el token.
         if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
             $token = $matches[1];
         }
 
-        // 3. Si no hay token, denegar el acceso inmediatamente.
+        // Si no hay token, denegar el acceso.
         if (!$token) {
             $response = $this->responseFactory->createResponse();
-            $response->getBody()->write(json_encode(['error' => 'Acceso no autorizado. Se requiere un token.']));
+            $response->getBody()->write(json_encode(['error' => 'Acceso no autorizado. Se requiere un token valido.']));
             return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
 
-        // 4. Buscar el usuario asociado al token en la base de datos.
+        // Buscar el usuario asociado al token en la base de datos.
         $user = User::findByToken($token);
 
-        // 5. Validar que el usuario exista y que el token no haya expirado.
+        // Validar que el usuario exista y que el token no haya expirado.
         if (!$user || (new DateTime() > new DateTime($user['token_expired_at']))) {
             $response = $this->responseFactory->createResponse();
             $response->getBody()->write(json_encode(['error' => 'Acceso denegado, el usuario debe estar logueado.']));
             return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
 
-        // 6. Extender la vida del token 5 minutos más.
+        // Extender la vida del token 5 minutos más.
         $new_expired_at = (new DateTime())->modify('+5 minutes')->format('Y-m-d H:i:s');
         User::updateToken($user['id'], $token, $new_expired_at);
 
-        // 7. ¡La parte clave! Añadir los datos del usuario al objeto $request.
+        // Añadir los datos del usuario al objeto $request.
         $request = $request->withAttribute('user', $user);
 
-        // 8. Pasar la petición (ya modificada) al siguiente eslabón (otro middleware o el controlador final).
+        // Pasar la petición (ya modificada) al siguiente eslabon
         return $handler->handle($request);
     }
 }
