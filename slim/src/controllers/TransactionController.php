@@ -61,7 +61,6 @@ class TransactionController {
             // 6. Obtener el saldo del usuario usando el modelo User
             $user_balance = User::getBalanceById($user_id);
 
-            // Comprobación defensiva: ¿se encontró el saldo del usuario?
             if ($user_balance === null) {
                 $response->getBody()->write(json_encode(['error' => 'No se pudo encontrar el usuario para la transaccion.']));
                 return $response->withStatus(404);
@@ -133,7 +132,7 @@ class TransactionController {
 
             if ($user_asset_quantity < $quantity) {
                 $response->getBody()->write(json_encode(['error' => 'No tienes suficientes activos para vender. Cantidad poseida: ' . $user_asset_quantity]));
-                return $response->withStatus(400);
+                return $response->withStatus(409);
             }
 
             // 6. Ejecutar las operaciones de la venta
