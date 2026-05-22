@@ -9,7 +9,7 @@ class Transaction {
     public $id;
     public $user_id;
     public $asset_id;
-    public $transaction_type; // 'BUY' o 'SELL'
+    public $transaction_type; // 'BUY' o 'SELL"
     public $quantity;
     public $price_per_unit;
     public $total_amount;
@@ -44,7 +44,6 @@ class Transaction {
         $total_amount = $quantity * $price;
         $stmt = $db->prepare("INSERT INTO transactions (user_id, asset_id, transaction_type, quantity, price_per_unit, total_amount) 
                               VALUES (?, ?, ?, ?, ?, ?)");
-        // 'type' sería 'BUY' o 'SELL' 
         return $stmt->execute([$user_id, $asset_id, $type, $quantity, $price, $total_amount]);
     }
 
