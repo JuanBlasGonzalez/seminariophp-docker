@@ -17,7 +17,7 @@ class Portfolio {
                                      (p.quantity * a.current_price) AS total_value
                               FROM portfolio p 
                               JOIN assets a ON p.asset_id = a.id 
-                              WHERE p.user_id = ? AND p.quantity > 0"); 
+                              WHERE p.user_id = ? AND p.quantity >= 0"); 
         $stmt->execute([$user_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -25,7 +25,7 @@ class Portfolio {
     // Actualizar o insertar cantidad de un activo para un usuario
     public static function updateStock($user_id, $asset_id, $quantity) {
         $db = DB::getConnection();
-        // Esta consulta es útil: si no existe el registro lo crea, si existe lo actualiza
+        // Si no existe el registro lo crea, si existe lo actualiza
         $stmt = $db->prepare("INSERT INTO portfolio (user_id, asset_id, quantity) 
                               VALUES (?, ?, ?) 
                               ON DUPLICATE KEY UPDATE quantity = quantity + ?");
